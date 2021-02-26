@@ -253,5 +253,74 @@ def results(nickname, level, rating):
                 </html>"""
 
 
+@app.route("/load_photo", methods=['POST', 'GET'])
+def load_photo():
+    code = """  function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+
+    // Loop through the FileList and render image files as thumbnails.
+    for (var i = 0, f; f = files[i]; i++) {
+
+      // Only process image files.
+      if (!f.type.match('image.*')) {
+        continue;
+      }
+
+      var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+        return function(e) {
+          // Render thumbnail.
+          var span = document.createElement('span');
+          span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                            '" title="', theFile.name, '"/>'].join('');
+          document.getElementById('list').insertBefore(span, null);
+        };
+      })(f);
+
+      // Read in the image file as a data URL.
+      reader.readAsDataURL(f);
+    }
+  }
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);"""
+    if request.method == 'GET':
+        return f'''<!doctype html>
+                                <html lang="en">
+                                  <head>
+                                    <meta charset="utf-8">
+                                    <meta name="viewport" content="width=device-width, 
+                                        initial-scale=1, shrink-to-fit=no">
+                                    <link rel="stylesheet"
+                                    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+                                    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+                                    crossorigin="anonymous">
+                                    <link rel="stylesheet" type="text/css" 
+                                        href="{url_for('static', filename='css/style_for_blank_photo.css')}" />
+                                    <title>Отбор астронавтов</title>
+                                  </head>
+                                  <body>
+                                    <h1>Загрузка фотографии</h1>
+                                    <h2>для участия в миссии</h2>
+                                    <div>
+                                        <form class="login_form" method="post">
+                                            <div class="form-group">
+                                                <input type="file" id="files" name="files">
+                                                <output id="list"></output>
+                                                <script type="text/javascript"> {code} </script>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Записаться</button>
+                                        </form>
+                                    </div>
+                                  </body>
+                                </html>'''
+    else:
+        print(request.method)
+        # f = request.files['file']
+        # print(f.read())
+        return "Форма отправлена"
+
+
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
